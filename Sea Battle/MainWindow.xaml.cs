@@ -47,6 +47,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (pressedButton.Name == "TurnButton")
+        {
+            Execute(CurrentGame.Click(Player.First, -1, -1));
+            return;
+        }
+
         var owner = ParseButtonName(pressedButton.Name).Item1;
         var row = ParseButtonName(pressedButton.Name).Item2.Item1;
         var column = ParseButtonName(pressedButton.Name).Item2.Item2;
@@ -227,10 +233,10 @@ public partial class MainWindow : Window
 
                 break;
             }
-            
+
             case DrawingType.Empty:
                 break;
-            
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
