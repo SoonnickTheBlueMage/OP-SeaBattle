@@ -46,6 +46,13 @@ public partial class MainWindow
                 if (GridDuoTable.Children[i] is Rectangle figure && (string) figure.Tag != "solid")
                     GridDuoTable.Children.RemoveAt(i);
 
+            for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
+                if (GridDuoTable.Children[i] is TextBlock {Name: "TextBlock"})
+                {
+                    TextBlock.Text = "First's turn";
+                    break;
+                }
+
             DrawTable();
             return;
         }
@@ -245,6 +252,14 @@ public partial class MainWindow
                     if (GridDuoTable.Children[i] is Rectangle figure &&
                         figure.Tag.ToString()!.Contains($"Ship_{command.BoardOwner}"))
                         figure.Visibility = Visibility.Hidden;
+
+                for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
+                    if (GridDuoTable.Children[i] is TextBlock {Name: "TextBlock"})
+                    {
+                        TextBlock.Text =
+                            $"{(command.BoardOwner == Player.First ? Player.Second : Player.First)}'s turn";
+                        break;
+                    }
 
                 break;
             }

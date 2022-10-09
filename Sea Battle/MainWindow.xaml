@@ -72,7 +72,9 @@
 
                 <TextBlock Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="21" FontSize="17" Foreground="Black"
                            FontFamily="Comic Sans MS, Verdana" TextAlignment="Center" Margin="0, 10, 0, 0"
-                           Tag="solid" />
+                           Tag="solid" Name="TextBlock">
+                    First's turn
+                </TextBlock>
 
                 <Button Grid.Row="14" Grid.Column="19" Grid.ColumnSpan="2" Foreground="MediumBlue"
                         FontFamily="Comic Sans MS, Verdana"
