@@ -30,7 +30,7 @@ public class Game
     {
         if (_turn == TurnStatus.FirstPlayerPreparation && cellOwner != Player.First ||
             _turn == TurnStatus.SecondPlayerPreparation && cellOwner != Player.Second)
-            return new Command(cellOwner, DrawingType.Empty, 0, 0);
+            return new Command(cellOwner, DrawingType.Empty);
 
         if (_tables[cellOwner].MyCell(row, column) == CellStatus.Empty)
         {
@@ -44,27 +44,35 @@ public class Game
             return new Command(cellOwner, DrawingType.EraseShipPart, row, column);
         }
 
-        return new Command(cellOwner, DrawingType.Empty, 0, 0); // zaglushka
+        return new Command(cellOwner, DrawingType.Empty); // zaglushka
     }
 
     private Command Turn(Player cellOwner, int row, int column)
     {
         if (_turn == TurnStatus.FirstGoes && cellOwner == Player.First ||
             _turn == TurnStatus.SecondGoes && cellOwner == Player.Second)
-            return new Command(cellOwner, DrawingType.Empty, 0, 0);
+            return new Command(cellOwner, DrawingType.Empty);
 
         var currentPlayer = _turn == TurnStatus.FirstGoes ? Player.First : Player.Second;
 
         if (_tables[currentPlayer].EnemyCell(row, column) != CellStatus.NoInfo)
-            return new Command(cellOwner, DrawingType.Empty, 0, 0);
+            return new Command(cellOwner, DrawingType.Empty);
 
         _tables[currentPlayer].SendStrike(row, column, _tables[cellOwner].MyCell(row, column));
         _tables[cellOwner].ReceiveStrike(row, column);
-        _turn = _turn == TurnStatus.FirstGoes ? TurnStatus.WaitingFirstLeave : TurnStatus.WaitingSecondLeave;
 
+        if (_tables[cellOwner].CheckShipDestruction(row, column))
+        {
+            var args = _tables[cellOwner].MarkingDestruction(row, column);
+
+            return new Command(cellOwner, DrawingType.DestroyShip, row, column, args.Item1, args.Item2);
+        }
+            
         if (_tables[currentPlayer].EnemyCell(row, column) == CellStatus.Hit)
             return new Command(cellOwner, DrawingType.DrawHit, row, column);
-
+        
+        _turn = _turn == TurnStatus.FirstGoes ? TurnStatus.WaitingFirstLeave : TurnStatus.WaitingSecondLeave;
+        
         return new Command(cellOwner, DrawingType.DrawMiss, row, column);
     }
 
@@ -92,11 +100,11 @@ public class Game
                     if (currentPlayer == Player.First)
                     {
                         _turn = TurnStatus.SecondPlayerPreparation;
-                        return new Command(currentPlayer, DrawingType.Hide, 0, 0);
+                        return new Command(currentPlayer, DrawingType.Hide);
                     }
 
                     _turn = TurnStatus.WaitingFirstTake;
-                    return new Command(currentPlayer, DrawingType.Hide, 0, 0);
+                    return new Command(currentPlayer, DrawingType.Hide);
                 }
 
                 MessageBox.Show("Расстановка не удовлетворяет правилам");
@@ -109,7 +117,7 @@ public class Game
                     ? TurnStatus.WaitingSecondTake
                     : TurnStatus.WaitingFirstTake;
 
-                return new Command(currentPlayer, DrawingType.Hide, 0, 0);
+                return new Command(currentPlayer, DrawingType.Hide);
 
             }
             else if (_turn is TurnStatus.WaitingFirstTake or TurnStatus.WaitingSecondTake)
@@ -118,10 +126,10 @@ public class Game
              
                 _turn = _turn == TurnStatus.WaitingFirstTake ? TurnStatus.FirstGoes : TurnStatus.SecondGoes;
                 
-                return new Command(currentPlayer, DrawingType.Show, 0, 0);
+                return new Command(currentPlayer, DrawingType.Show);
             }
 
-            return new Command(Player.First, DrawingType.Empty, 0, 0);
+            return new Command(Player.First, DrawingType.Empty);
         }
 
         switch (_turn)
@@ -134,6 +142,6 @@ public class Game
         }
 
 
-        return new Command(Player.First, DrawingType.Empty, 0, 0); // zaglushka
+        return new Command(Player.First, DrawingType.Empty); // zaglushka
     }
 }
