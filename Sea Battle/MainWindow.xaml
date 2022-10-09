@@ -56,14 +56,14 @@
                     Turn
                 </Button>
 
-                <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="3" FontSize="18" Foreground="MediumBlue"
+                <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="4" FontSize="18" Foreground="MediumBlue"
                            FontFamily="Comic Sans MS, Verdana">
-                    Player One
+                    First Player
                 </TextBlock>
 
-                <TextBlock Grid.Row="12" Grid.Column="18" Grid.ColumnSpan="3" FontSize="18" Foreground="MediumBlue"
+                <TextBlock Grid.Row="12" Grid.Column="17" Grid.ColumnSpan="4" FontSize="18" Foreground="MediumBlue"
                            FontFamily="Comic Sans MS, Verdana">
-                    Player Two
+                    Second Player
                 </TextBlock>
 
             </Grid>

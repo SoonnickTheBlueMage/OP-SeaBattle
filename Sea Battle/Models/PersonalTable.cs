@@ -13,6 +13,12 @@ public enum CellStatus
     PartOfMyShip // only for _myBoard
 }
 
+/*
+ * Персональный стол игрока состоит из его поля и поля противника.
+ * На своем поле отмечаются корабли, попадания и промахи.
+ * На чужом поле отмечаются попадания и промахи - информация о противниике.
+ */
+
 public class PersonalTable
 {
     private readonly CellStatus[,] _myBoard = new CellStatus[10, 10];
@@ -193,18 +199,33 @@ public class PersonalTable
 
         _myBoard[row, column] = CellStatus.Hit;
 
+        var top = MarkingOnTop(row, column);
+        markList.UnionWith(top.Item1!);
+        destroyList.UnionWith(top.Item2!);
+
+        var bottom = MarkingOnBottom(row, column);
+        markList.UnionWith(bottom.Item1!);
+        destroyList.UnionWith(bottom.Item2!);
+
+        var left = MarkingOnLeft(row, column);
+        markList.UnionWith(left.Item1!);
+        destroyList.UnionWith(left.Item2!);
+
+        var right = MarkingOnRight(row, column);
+        markList.UnionWith(right.Item1!);
+        destroyList.UnionWith(right.Item2!);
+
+        return new Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?>(markList, destroyList);
+    }
+
+    private Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?> MarkingOnTop(int row, int column)
+    {
+        var markList = new SortedSet<Tuple<int, int>>();
+        var destroyList = new SortedSet<Tuple<int, int>> {new(row, column)};
+
         for (var rowIterator = row; rowIterator >= 0; rowIterator--)
-        {
-            if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty)
+            if (MyCell(rowIterator, column) is CellStatus.Hit or CellStatus.Miss or CellStatus.Empty)
             {
-                markList.Add(new Tuple<int, int>(rowIterator, column));
-                break;
-            }
-
-            if (MyCell(rowIterator, column) == CellStatus.Hit)
-            {
-                destroyList.Add(new Tuple<int, int>(rowIterator, column));
-
                 if (column - 1 >= 0 && MyCell(rowIterator, column - 1) == CellStatus.Empty)
                 {
                     _myBoard[rowIterator, column - 1] = CellStatus.Miss;
@@ -216,21 +237,27 @@ public class PersonalTable
                     _myBoard[rowIterator, column + 1] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(rowIterator, column + 1));
                 }
+
+                if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty)
+                {
+                    markList.Add(new Tuple<int, int>(rowIterator, column));
+                    break;
+                }
+
+                destroyList.Add(new Tuple<int, int>(rowIterator, column));
             }
-        }
+
+        return new Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?>(markList, destroyList);
+    }
+
+    private Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?> MarkingOnBottom(int row, int column)
+    {
+        var markList = new SortedSet<Tuple<int, int>>();
+        var destroyList = new SortedSet<Tuple<int, int>> {new(row, column)};
 
         for (var rowIterator = row; rowIterator < 10; rowIterator++)
-        {
-            if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty)
+            if (MyCell(rowIterator, column) is CellStatus.Hit or CellStatus.Miss or CellStatus.Empty)
             {
-                markList.Add(new Tuple<int, int>(rowIterator, column));
-                break;
-            }
-
-            if (MyCell(rowIterator, column) == CellStatus.Hit)
-            {
-                destroyList.Add(new Tuple<int, int>(rowIterator, column));
-
                 if (column - 1 >= 0 && MyCell(rowIterator, column - 1) == CellStatus.Empty)
                 {
                     _myBoard[rowIterator, column - 1] = CellStatus.Miss;
@@ -242,21 +269,27 @@ public class PersonalTable
                     _myBoard[rowIterator, column + 1] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(rowIterator, column + 1));
                 }
+
+                if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty)
+                {
+                    markList.Add(new Tuple<int, int>(rowIterator, column));
+                    break;
+                }
+
+                destroyList.Add(new Tuple<int, int>(rowIterator, column));
             }
-        }
+
+        return new Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?>(markList, destroyList);
+    }
+
+    private Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?> MarkingOnLeft(int row, int column)
+    {
+        var markList = new SortedSet<Tuple<int, int>>();
+        var destroyList = new SortedSet<Tuple<int, int>> {new(row, column)};
 
         for (var columnIterator = column; columnIterator >= 0; columnIterator--)
-        {
-            if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
+            if (MyCell(row, columnIterator) is CellStatus.Hit or CellStatus.Miss or CellStatus.Empty)
             {
-                markList.Add(new Tuple<int, int>(row, columnIterator));
-                break;
-            }
-
-            if (MyCell(row, columnIterator) == CellStatus.Hit)
-            {
-                destroyList.Add(new Tuple<int, int>(row, columnIterator));
-
                 if (row - 1 >= 0 && MyCell(row - 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row - 1, columnIterator] = CellStatus.Miss;
@@ -268,21 +301,27 @@ public class PersonalTable
                     _myBoard[row + 1, columnIterator] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(row + 1, columnIterator));
                 }
+
+                if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
+                {
+                    markList.Add(new Tuple<int, int>(row, columnIterator));
+                    break;
+                }
+
+                destroyList.Add(new Tuple<int, int>(row, columnIterator));
             }
-        }
+
+        return new Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?>(markList, destroyList);
+    }
+
+    private Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?> MarkingOnRight(int row, int column)
+    {
+        var markList = new SortedSet<Tuple<int, int>>();
+        var destroyList = new SortedSet<Tuple<int, int>> {new(row, column)};
 
         for (var columnIterator = column; columnIterator < 10; columnIterator++)
-        {
-            if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
+            if (MyCell(row, columnIterator) is CellStatus.Hit or CellStatus.Miss or CellStatus.Empty)
             {
-                markList.Add(new Tuple<int, int>(row, columnIterator));
-                break;
-            }
-
-            if (MyCell(row, columnIterator) == CellStatus.Hit)
-            {
-                destroyList.Add(new Tuple<int, int>(row, columnIterator));
-
                 if (row - 1 >= 0 && MyCell(row - 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row - 1, columnIterator] = CellStatus.Miss;
@@ -294,8 +333,15 @@ public class PersonalTable
                     _myBoard[row + 1, columnIterator] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(row + 1, columnIterator));
                 }
+
+                if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
+                {
+                    markList.Add(new Tuple<int, int>(row, columnIterator));
+                    break;
+                }
+
+                destroyList.Add(new Tuple<int, int>(row, columnIterator));
             }
-        }
 
         return new Tuple<SortedSet<Tuple<int, int>>?, SortedSet<Tuple<int, int>>?>(markList, destroyList);
     }

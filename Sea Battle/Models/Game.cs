@@ -9,6 +9,15 @@ public enum Player
     Second
 }
 
+/*
+ * Preparation Phase:
+ * FirstPlayerPreparation -> Hide + SecondPlayerPreparation -> Hide + WaitingFirstTake -> Show + FirstGoes
+ *
+ * Game Phase:
+ * FirstGoes (turn) -> Hide + WaitingFirstLeave -> WaitingSecondTake -> Show + SecondGoes (turn) ->
+ * -> Hide + WaitingSecondLeave -> WaitingFirstTake -> Show + FirstGoes -> ... 
+ */
+
 internal enum TurnStatus
 {
     FirstPlayerPreparation,
@@ -31,24 +40,77 @@ internal enum Ship
     AssaultBoat
 }
 
+/*
+ * Этот класс отслеживает все стадии игры и все ходы.
+ * Осуществляет взаимосвязь логики игры и отрисовки игры в окне.
+ * Делает запросы классу PersonalTable и отправляет команду поведения в MainWindow.
+ */
+
 public class Game
 {
     private TurnStatus _turn;
     private readonly Dictionary<Player, PersonalTable> _tables;
-    private readonly Dictionary<Player, List<Ship>> _fleets  = new()
+
+    private readonly Dictionary<Player, List<Ship>> _fleets = new()
     {
-        {Player.First, new List<Ship>
         {
-            Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
-            Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship , Ship.Carrier}
+            Player.First, new List<Ship>
+            {
+                Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
+                Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship, Ship.Carrier
+            }
         },
-        
-        {Player.Second, new List<Ship>
+
         {
-            Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
-            Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship , Ship.Carrier}
+            Player.Second, new List<Ship>
+            {
+                Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
+                Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship, Ship.Carrier
+            }
         }
     };
+
+    private Command Preparation()
+    {
+        var currentPlayer = _turn == TurnStatus.FirstPlayerPreparation ? Player.First : Player.Second;
+
+        if (_tables[currentPlayer].CheckThatPlacementIsCorrect() &&
+            _tables[currentPlayer].CheckThatShipsAraFine())
+        {
+            if (currentPlayer == Player.First)
+            {
+                _turn = TurnStatus.SecondPlayerPreparation;
+                return new Command(currentPlayer, DrawingType.Hide);
+            }
+
+            _turn = TurnStatus.WaitingFirstTake;
+            return new Command(currentPlayer, DrawingType.Hide);
+        }
+
+        MessageBox.Show("Расстановка не удовлетворяет правилам");
+
+        return new Command(currentPlayer, DrawingType.Empty);
+    }
+
+    private Command PlayerEndsTurn()
+    {
+        var currentPlayer = _turn == TurnStatus.WaitingFirstLeave ? Player.First : Player.Second;
+
+        _turn = _turn == TurnStatus.WaitingFirstLeave
+            ? TurnStatus.WaitingSecondTake
+            : TurnStatus.WaitingFirstTake;
+
+        return new Command(currentPlayer, DrawingType.Hide);
+    }
+
+    private Command PlayerStartsTurn()
+    {
+        var currentPlayer = _turn == TurnStatus.WaitingFirstTake ? Player.First : Player.Second;
+
+        _turn = _turn == TurnStatus.WaitingFirstTake ? TurnStatus.FirstGoes : TurnStatus.SecondGoes;
+
+        return new Command(currentPlayer, DrawingType.Show);
+    }
 
     private Command PlayerPreparationStep(Player cellOwner, int row, int column)
     {
@@ -85,6 +147,7 @@ public class Game
         _tables[currentPlayer].SendStrike(row, column, _tables[cellOwner].MyCell(row, column));
         _tables[cellOwner].ReceiveStrike(row, column);
 
+        // если уничтожили корабль
         if (_tables[cellOwner].CheckShipDestruction(row, column))
         {
             var args = _tables[cellOwner].MarkingDestruction(row, column);
@@ -142,65 +205,27 @@ public class Game
 
     public Command Click(Player cellOwner, int row, int column)
     {
-        if (_turn == TurnStatus.GameOverFirstWin || _turn == TurnStatus.GameOverSecondWin)
+        if (_turn is TurnStatus.GameOverFirstWin or TurnStatus.GameOverSecondWin)
         {
             var currentPlayer = _turn == TurnStatus.GameOverFirstWin ? Player.First : Player.Second;
             MessageBox.Show($"Игра окончена, победил {currentPlayer} Player");
             return new Command(cellOwner, DrawingType.Empty);
         }
-        
+
         if (row == -1 && column == -1)
         {
-            if (_turn is TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation)
-            {
-                var currentPlayer = _turn == TurnStatus.FirstPlayerPreparation ? Player.First : Player.Second;
-
-                if (_tables[currentPlayer].CheckThatPlacementIsCorrect() &&
-                    _tables[currentPlayer].CheckThatShipsAraFine())
-                {
-                    if (currentPlayer == Player.First)
-                    {
-                        _turn = TurnStatus.SecondPlayerPreparation;
-                        return new Command(currentPlayer, DrawingType.Hide);
-                    }
-
-                    _turn = TurnStatus.WaitingFirstTake;
-                    return new Command(currentPlayer, DrawingType.Hide);
-                }
-
-                MessageBox.Show("Расстановка не удовлетворяет правилам");
-            }
-            else if (_turn is TurnStatus.WaitingFirstLeave or TurnStatus.WaitingSecondLeave)
-            {
-                var currentPlayer = _turn == TurnStatus.WaitingFirstLeave ? Player.First : Player.Second;
-
-                _turn = _turn == TurnStatus.WaitingFirstLeave
-                    ? TurnStatus.WaitingSecondTake
-                    : TurnStatus.WaitingFirstTake;
-
-                return new Command(currentPlayer, DrawingType.Hide);
-            }
-            else if (_turn is TurnStatus.WaitingFirstTake or TurnStatus.WaitingSecondTake)
-            {
-                var currentPlayer = _turn == TurnStatus.WaitingFirstTake ? Player.First : Player.Second;
-
-                _turn = _turn == TurnStatus.WaitingFirstTake ? TurnStatus.FirstGoes : TurnStatus.SecondGoes;
-
-                return new Command(currentPlayer, DrawingType.Show);
-            }
+            if (_turn is TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation) return Preparation();
+            if (_turn is TurnStatus.WaitingFirstLeave or TurnStatus.WaitingSecondLeave) return PlayerEndsTurn();
+            if (_turn is TurnStatus.WaitingFirstTake or TurnStatus.WaitingSecondTake) return PlayerStartsTurn();
 
             return new Command(Player.First, DrawingType.Empty);
         }
 
-        switch (_turn)
-        {
-            case TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation:
-                return PlayerPreparationStep(cellOwner, row, column);
+        if (_turn is TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation)
+            return PlayerPreparationStep(cellOwner, row, column);
 
-            case TurnStatus.FirstGoes or TurnStatus.SecondGoes:
-                return Turn(cellOwner, row, column);
-        }
-
+        if (_turn is TurnStatus.FirstGoes or TurnStatus.SecondGoes)
+            return Turn(cellOwner, row, column);
 
         return new Command(Player.First, DrawingType.Empty); // zaglushka
     }
