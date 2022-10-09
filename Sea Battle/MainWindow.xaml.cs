@@ -250,16 +250,13 @@ public partial class MainWindow
             case DrawingType.DestroyShip:
             {
                 if (command.PointsToMark == null || command.PointsToDestroy == null) break;
-                
-                Execute((new Command(command.BoardOwner, DrawingType.DrawHit, command.Row, command.Column)));
-                
+
+                Execute(new Command(command.BoardOwner, DrawingType.DrawHit, command.Row, command.Column));
+
                 foreach (var point in command.PointsToMark)
-                {
                     Execute(new Command(command.BoardOwner, DrawingType.DrawMiss, point.Item1, point.Item2));
-                }
 
                 foreach (var point in command.PointsToDestroy)
-                {
                     for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
                         if (GridDuoTable.Children[i] is Rectangle figure &&
                             figure.Tag.ToString()!.Contains($"Ship_{command.BoardOwner}_{point.Item1}_{point.Item2}"))
@@ -267,8 +264,7 @@ public partial class MainWindow
                             figure.Tag = "killed";
                             figure.Visibility = Visibility.Visible;
                         }
-                }
-                
+
                 break;
             }
 

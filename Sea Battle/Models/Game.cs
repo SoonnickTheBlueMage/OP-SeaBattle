@@ -67,12 +67,12 @@ public class Game
 
             return new Command(cellOwner, DrawingType.DestroyShip, row, column, args.Item1, args.Item2);
         }
-            
+
         if (_tables[currentPlayer].EnemyCell(row, column) == CellStatus.Hit)
             return new Command(cellOwner, DrawingType.DrawHit, row, column);
-        
+
         _turn = _turn == TurnStatus.FirstGoes ? TurnStatus.WaitingFirstLeave : TurnStatus.WaitingSecondLeave;
-        
+
         return new Command(cellOwner, DrawingType.DrawMiss, row, column);
     }
 
@@ -112,20 +112,19 @@ public class Game
             else if (_turn is TurnStatus.WaitingFirstLeave or TurnStatus.WaitingSecondLeave)
             {
                 var currentPlayer = _turn == TurnStatus.WaitingFirstLeave ? Player.First : Player.Second;
-                
+
                 _turn = _turn == TurnStatus.WaitingFirstLeave
                     ? TurnStatus.WaitingSecondTake
                     : TurnStatus.WaitingFirstTake;
 
                 return new Command(currentPlayer, DrawingType.Hide);
-
             }
             else if (_turn is TurnStatus.WaitingFirstTake or TurnStatus.WaitingSecondTake)
             {
                 var currentPlayer = _turn == TurnStatus.WaitingFirstTake ? Player.First : Player.Second;
-             
+
                 _turn = _turn == TurnStatus.WaitingFirstTake ? TurnStatus.FirstGoes : TurnStatus.SecondGoes;
-                
+
                 return new Command(currentPlayer, DrawingType.Show);
             }
 

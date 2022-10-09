@@ -125,7 +125,7 @@ public class PersonalTable
 
         if (max != 10) return false; // проверяет, что кораблей 10 штук
 
-        var comps = new int[10] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        var comps = new[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
         for (var i = 0; i < 10; i++)
         for (var j = 0; j < 10; j++)
@@ -156,22 +156,25 @@ public class PersonalTable
     public bool CheckShipDestruction(int row, int column)
     {
         if (MyCell(row, column) != CellStatus.Hit) return false;
-            
+
         for (var rowIterator = row; rowIterator >= 0; rowIterator--)
         {
             if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty) break;
             if (MyCell(rowIterator, column) == CellStatus.PartOfMyShip) return false;
         }
+
         for (var rowIterator = row; rowIterator < 10; rowIterator++)
         {
             if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty) break;
             if (MyCell(rowIterator, column) == CellStatus.PartOfMyShip) return false;
         }
-        for (var columnIterator= column; columnIterator >= 0; columnIterator--)
+
+        for (var columnIterator = column; columnIterator >= 0; columnIterator--)
         {
             if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty) break;
             if (MyCell(row, columnIterator) == CellStatus.PartOfMyShip) return false;
         }
+
         for (var columnIterator = column; columnIterator < 10; columnIterator++)
         {
             if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty) break;
@@ -195,6 +198,7 @@ public class PersonalTable
                 markList.Add(new Tuple<int, int>(rowIterator, column));
                 break;
             }
+
             if (MyCell(rowIterator, column) == CellStatus.Hit)
             {
                 destroyList.Add(new Tuple<int, int>(rowIterator, column));
@@ -204,6 +208,7 @@ public class PersonalTable
                     _myBoard[rowIterator, column - 1] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(rowIterator, column - 1));
                 }
+
                 if (column + 1 < 10 && MyCell(rowIterator, column + 1) == CellStatus.Empty)
                 {
                     _myBoard[rowIterator, column + 1] = CellStatus.Miss;
@@ -211,6 +216,7 @@ public class PersonalTable
                 }
             }
         }
+
         for (var rowIterator = row; rowIterator < 10; rowIterator++)
         {
             if (MyCell(rowIterator, column) is CellStatus.Miss or CellStatus.Empty)
@@ -218,15 +224,17 @@ public class PersonalTable
                 markList.Add(new Tuple<int, int>(rowIterator, column));
                 break;
             }
+
             if (MyCell(rowIterator, column) == CellStatus.Hit)
             {
                 destroyList.Add(new Tuple<int, int>(rowIterator, column));
-                
+
                 if (column - 1 > 0 && MyCell(rowIterator, column - 1) == CellStatus.Empty)
                 {
                     _myBoard[rowIterator, column - 1] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(rowIterator, column - 1));
                 }
+
                 if (column + 1 < 10 && MyCell(rowIterator, column + 1) == CellStatus.Empty)
                 {
                     _myBoard[rowIterator, column + 1] = CellStatus.Miss;
@@ -234,22 +242,25 @@ public class PersonalTable
                 }
             }
         }
-        for (var columnIterator= column; columnIterator >= 0; columnIterator--)
+
+        for (var columnIterator = column; columnIterator >= 0; columnIterator--)
         {
             if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
             {
                 markList.Add(new Tuple<int, int>(row, columnIterator));
                 break;
             }
+
             if (MyCell(row, columnIterator) == CellStatus.Hit)
             {
                 destroyList.Add(new Tuple<int, int>(row, columnIterator));
-                
+
                 if (row - 1 > 0 && MyCell(row - 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row - 1, columnIterator] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(row - 1, columnIterator));
                 }
+
                 if (row + 1 < 10 && MyCell(row + 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row + 1, columnIterator] = CellStatus.Miss;
@@ -257,6 +268,7 @@ public class PersonalTable
                 }
             }
         }
+
         for (var columnIterator = column; columnIterator < 10; columnIterator++)
         {
             if (MyCell(row, columnIterator) is CellStatus.Miss or CellStatus.Empty)
@@ -264,15 +276,17 @@ public class PersonalTable
                 markList.Add(new Tuple<int, int>(row, columnIterator));
                 break;
             }
+
             if (MyCell(columnIterator, column) == CellStatus.Hit)
             {
                 destroyList.Add(new Tuple<int, int>(row, columnIterator));
-                
+
                 if (row - 1 > 0 && MyCell(row - 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row - 1, columnIterator] = CellStatus.Miss;
                     markList.Add(new Tuple<int, int>(row - 1, columnIterator));
                 }
+
                 if (row + 1 < 10 && MyCell(row + 1, columnIterator) == CellStatus.Empty)
                 {
                     _myBoard[row + 1, columnIterator] = CellStatus.Miss;
