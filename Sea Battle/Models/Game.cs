@@ -22,23 +22,25 @@ public class Game
     private TurnStatus _turn;
     private readonly Dictionary<Player, PersonalTable> _tables;
 
-    private Command FirstPlayerPreparationStep(Player cellOwner, int row, int column)
+    private Command PlayerPreparationStep(Player cellOwner, int row, int column)
     {
-        if (cellOwner != Player.First) return new Command(Player.First, DrawingType.Empty, 0, 0);
+        if (_turn == TurnStatus.FirstPlayerPreparation && cellOwner != Player.First ||
+            _turn == TurnStatus.SecondPlayerPreparation && cellOwner != Player.Second)
+            return new Command(cellOwner, DrawingType.Empty, 0, 0);
 
-        if (_tables[Player.First].MyCell(row, column) == CellStatus.Empty)
+        if (_tables[cellOwner].MyCell(row, column) == CellStatus.Empty)
         {
-            _tables[Player.First].PreparationStep(row, column);
-            return new Command(Player.First, DrawingType.DrawShipPart, row, column);
+            _tables[cellOwner].PreparationStep(row, column);
+            return new Command(cellOwner, DrawingType.DrawShipPart, row, column);
         }
 
-        if (_tables[Player.First].MyCell(row, column) == CellStatus.PartOfMyShip)
+        if (_tables[cellOwner].MyCell(row, column) == CellStatus.PartOfMyShip)
         {
-            _tables[Player.First].PreparationStep(row, column);
-            return new Command(Player.First, DrawingType.EraseShipPart, row, column);
+            _tables[cellOwner].PreparationStep(row, column);
+            return new Command(cellOwner, DrawingType.EraseShipPart, row, column);
         }
 
-        return new Command(Player.First, DrawingType.Empty, 0, 0); // zaglushka
+        return new Command(cellOwner, DrawingType.Empty, 0, 0); // zaglushka
     }
 
     public Game()
@@ -54,32 +56,42 @@ public class Game
     public Command Click(Player cellOwner, int row, int column)
     {
         if (row == -1 && column == -1)
-            if (_turn == TurnStatus.FirstPlayerPreparation)
+            if (_turn is TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation)
             {
-                if (_tables[Player.First].CheckThatPlacementIsCorrect() && _tables[Player.First].CheckThatShipsAraFine())
+                var currentPlayer = _turn == TurnStatus.FirstPlayerPreparation ? Player.First : Player.Second;
+
+                if (_tables[currentPlayer].CheckThatPlacementIsCorrect() &&
+                    _tables[currentPlayer].CheckThatShipsAraFine())
                 {
-                    MessageBox.Show("ok");
+                    if (currentPlayer == Player.First)
+                    {
+                        _turn = TurnStatus.SecondPlayerPreparation;
+                        return new Command(currentPlayer, DrawingType.Hide, 0, 0);
+                    }
+
+                    _turn = TurnStatus.FirstGoes;
+                    return new Command(currentPlayer, DrawingType.SwitchView, 0, 0);
                 }
-                
-                return new Command(Player.First, DrawingType.Empty, 0, 0); // zaglushka
+
+                MessageBox.Show("Расстановка не удовлетворяет правилам");
+
+                return new Command(Player.First, DrawingType.Empty, 0, 0);
             }
 
-        if (_turn == TurnStatus.FirstPlayerPreparation) return FirstPlayerPreparationStep(cellOwner, row, column);
-
-        if (_turn == TurnStatus.SecondPlayerPreparation)
+        switch (_turn)
         {
-            //Todo
+            case TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation:
+                return PlayerPreparationStep(cellOwner, row, column);
+
+            case TurnStatus.FirstGoes:
+                //Todo
+                break;
+
+            case TurnStatus.SecondGoes:
+                //Todo
+                break;
         }
 
-        if (_turn == TurnStatus.FirstGoes)
-        {
-            //Todo
-        }
-
-        if (_turn == TurnStatus.SecondGoes)
-        {
-            //Todo
-        }
 
         return new Command(Player.First, DrawingType.Empty, 0, 0); // zaglushka
     }

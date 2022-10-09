@@ -6,7 +6,9 @@ public enum DrawingType
     DrawHit,
     DrawMiss,
     DrawShipPart,
-    EraseShipPart
+    EraseShipPart,
+    Hide,
+    SwitchView
 }
 
 public record Command(Player BoardOwner, DrawingType Draw, int Row, int Column)

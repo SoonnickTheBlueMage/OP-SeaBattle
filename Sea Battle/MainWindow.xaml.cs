@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Sea_Battle.Models;
 
@@ -19,7 +10,7 @@ namespace Sea_Battle;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow : Window
+public partial class MainWindow
 {
     private static readonly Game CurrentGame = new();
 
@@ -229,6 +220,33 @@ public partial class MainWindow : Window
                     {
                         GridDuoTable.Children.RemoveAt(i);
                         break;
+                    }
+
+                break;
+            }
+
+            case DrawingType.Hide:
+            {
+                for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
+                    if (GridDuoTable.Children[i] is Rectangle figure &&
+                        figure.Tag.ToString()!.Contains($"Ship_{command.BoardOwner}"))
+                        figure.Visibility = Visibility.Hidden;
+
+                break;
+            }
+
+            case DrawingType.SwitchView:
+            {
+                Execute(new Command(command.BoardOwner, DrawingType.Hide, 0, 0));
+
+                var oppositePlayer = command.BoardOwner == Player.First ? Player.Second : Player.First;
+
+                for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
+                    if (GridDuoTable.Children[i] is Rectangle figure &&
+                        figure.Tag.ToString()!.Contains($"Ship_{oppositePlayer}"))
+                    {
+                        figure.Visibility = Visibility.Visible;
+                        figure.IsHitTestVisible = false;
                     }
 
                 break;

@@ -51,9 +51,9 @@
                     <RowDefinition Height="40" />
                 </Grid.RowDefinitions>
 
-                <Button Grid.Row="12" Grid.Column="9" Grid.ColumnSpan="3" FontSize="18" 
-                       Click="ButtonClick" Name="TurnButton">
-                     Turn
+                <Button Grid.Row="12" Grid.Column="9" Grid.ColumnSpan="3" FontSize="18"
+                        Click="ButtonClick" Name="TurnButton">
+                    Turn
                 </Button>
 
                 <TextBlock Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="3" FontSize="18" Foreground="MediumBlue"
