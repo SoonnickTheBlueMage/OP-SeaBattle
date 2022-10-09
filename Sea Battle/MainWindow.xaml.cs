@@ -12,7 +12,7 @@ namespace Sea_Battle;
 /// </summary>
 public partial class MainWindow
 {
-    private static readonly Game CurrentGame = new();
+    private static Game _currentGame = new();
 
     public MainWindow()
     {
@@ -38,9 +38,21 @@ public partial class MainWindow
             return;
         }
 
+        if (pressedButton.Name == "RestartButton")
+        {
+            _currentGame = new Game();
+
+            for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
+                if (GridDuoTable.Children[i] is Rectangle figure && (string) figure.Tag != "solid")
+                    GridDuoTable.Children.RemoveAt(i);
+
+            DrawTable();
+            return;
+        }
+
         if (pressedButton.Name == "TurnButton")
         {
-            Execute(CurrentGame.Click(Player.First, -1, -1));
+            Execute(_currentGame.Click(Player.First, -1, -1));
             return;
         }
 
@@ -48,7 +60,7 @@ public partial class MainWindow
         var row = ParseButtonName(pressedButton.Name).Item2.Item1;
         var column = ParseButtonName(pressedButton.Name).Item2.Item2;
 
-        Execute(CurrentGame.Click(owner, row, column));
+        Execute(_currentGame.Click(owner, row, column));
     }
 
     private void DrawTable()
