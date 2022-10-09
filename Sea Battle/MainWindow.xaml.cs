@@ -222,7 +222,8 @@ public partial class MainWindow
                     Tag = $"Ship_{command.BoardOwner}_{command.Row}_{command.Column}",
                     Width = 30,
                     Height = 30,
-                    Fill = Brushes.MediumBlue
+                    Fill = Brushes.MediumBlue,
+                    Opacity = 0.7
                 };
 
                 Grid.SetRow(square, command.Row);
