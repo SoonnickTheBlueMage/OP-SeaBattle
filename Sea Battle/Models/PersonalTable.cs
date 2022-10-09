@@ -5,13 +5,12 @@ namespace Sea_Battle.Models;
 
 public enum CellStatus
 {
-    Empty,
-    NoInfo,
-    Hit,
-    Miss,
-    PartOfDestroyedShip,
-    PartOfMyShip,
-    PartOfEnemyShip
+    Empty, // only for _myBoard
+    NoInfo, // only for _enemyBoard
+    Hit, // for both
+    Miss, // for both
+    PartOfDestroyedShip, // for both
+    PartOfMyShip // only for _myBoard
 }
 
 public class PersonalTable
@@ -138,5 +137,19 @@ public class PersonalTable
         return comps[0] == 1 && comps[1] == 1 && comps[2] == 1 && comps[3] == 1 &&
                comps[4] == 2 && comps[5] == 2 && comps[6] == 2 && comps[7] == 3 &&
                comps[8] == 3 && comps[9] == 4; // проверяет, что корабли нужных размеров
+    }
+
+    public void SendStrike(int row, int column, CellStatus info)
+    {
+        Debug.Assert(row is >= 0 and < 10 && column is >= 0 and <= 10);
+
+        _enemyBoard[row, column] = info == CellStatus.PartOfMyShip ? CellStatus.Hit : CellStatus.Miss;
+    }
+
+    public void ReceiveStrike(int row, int column)
+    {
+        Debug.Assert(row is >= 0 and < 10 && column is >= 0 and <= 10);
+
+        _myBoard[row, column] = _myBoard[row, column] == CellStatus.PartOfMyShip ? CellStatus.Hit : CellStatus.Miss;
     }
 }

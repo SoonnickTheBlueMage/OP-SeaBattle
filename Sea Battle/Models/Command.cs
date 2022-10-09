@@ -8,7 +8,7 @@ public enum DrawingType
     DrawShipPart,
     EraseShipPart,
     Hide,
-    SwitchView
+    Show
 }
 
 public record Command(Player BoardOwner, DrawingType Draw, int Row, int Column)

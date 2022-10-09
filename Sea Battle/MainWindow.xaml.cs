@@ -173,6 +173,7 @@ public partial class MainWindow
 
                 GridDuoTable.Children.Add(line1);
                 GridDuoTable.Children.Add(line2);
+
                 break;
             }
 
@@ -187,9 +188,10 @@ public partial class MainWindow
                 };
 
                 Grid.SetRow(dot, command.Row);
-                Grid.SetColumn(dot, command.Column);
+                Grid.SetColumn(dot, command.BoardOwner == Player.First ? command.Column : command.Column + 11);
 
                 GridDuoTable.Children.Add(dot);
+
                 break;
             }
 
@@ -201,7 +203,7 @@ public partial class MainWindow
                     Tag = $"Ship_{command.BoardOwner}_{command.Row}_{command.Column}",
                     Width = 30,
                     Height = 30,
-                    Fill = Brushes.DarkViolet
+                    Fill = Brushes.MediumBlue
                 };
 
                 Grid.SetRow(square, command.Row);
@@ -235,19 +237,12 @@ public partial class MainWindow
                 break;
             }
 
-            case DrawingType.SwitchView:
+            case DrawingType.Show:
             {
-                Execute(new Command(command.BoardOwner, DrawingType.Hide, 0, 0));
-
-                var oppositePlayer = command.BoardOwner == Player.First ? Player.Second : Player.First;
-
                 for (var i = GridDuoTable.Children.Count - 1; i >= 0; --i)
                     if (GridDuoTable.Children[i] is Rectangle figure &&
-                        figure.Tag.ToString()!.Contains($"Ship_{oppositePlayer}"))
-                    {
+                        figure.Tag.ToString()!.Contains($"Ship_{command.BoardOwner}"))
                         figure.Visibility = Visibility.Visible;
-                        figure.IsHitTestVisible = false;
-                    }
 
                 break;
             }
