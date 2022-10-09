@@ -268,6 +268,19 @@ public partial class MainWindow
                 break;
             }
 
+            case DrawingType.EndGame:
+            {
+                var winner = command.BoardOwner == Player.First ? Player.Second : Player.First;
+
+                Execute(new Command(command.BoardOwner, DrawingType.DestroyShip, command.Row, command.Column,
+                    command.PointsToMark, command.PointsToDestroy));
+                Execute(new Command(command.BoardOwner, DrawingType.Show));
+
+                MessageBox.Show($"Игра окончена, победил {winner} Player");
+
+                break;
+            }
+
             case DrawingType.Empty:
                 break;
 

@@ -18,13 +18,37 @@ internal enum TurnStatus
     WaitingFirstLeave,
     WaitingSecondLeave,
     WaitingFirstTake,
-    WaitingSecondTake
+    WaitingSecondTake,
+    GameOverFirstWin,
+    GameOverSecondWin
+}
+
+internal enum Ship
+{
+    Carrier,
+    Battleship,
+    Frigate,
+    AssaultBoat
 }
 
 public class Game
 {
     private TurnStatus _turn;
     private readonly Dictionary<Player, PersonalTable> _tables;
+    private readonly Dictionary<Player, List<Ship>> _fleets  = new()
+    {
+        {Player.First, new List<Ship>
+        {
+            Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
+            Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship , Ship.Carrier}
+        },
+        
+        {Player.Second, new List<Ship>
+        {
+            Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat, Ship.AssaultBoat,
+            Ship.Frigate, Ship.Frigate, Ship.Frigate, Ship.Battleship, Ship.Battleship , Ship.Carrier}
+        }
+    };
 
     private Command PlayerPreparationStep(Player cellOwner, int row, int column)
     {
@@ -65,6 +89,36 @@ public class Game
         {
             var args = _tables[cellOwner].MarkingDestruction(row, column);
 
+            switch (args.Item2!.Count)
+            {
+                case 4:
+                {
+                    _fleets[cellOwner].Remove(Ship.Carrier);
+                    break;
+                }
+                case 3:
+                {
+                    _fleets[cellOwner].Remove(Ship.Battleship);
+                    break;
+                }
+                case 2:
+                {
+                    _fleets[cellOwner].Remove(Ship.Frigate);
+                    break;
+                }
+                case 1:
+                {
+                    _fleets[cellOwner].Remove(Ship.AssaultBoat);
+                    break;
+                }
+            }
+
+            if (_fleets[cellOwner].Count == 0)
+            {
+                _turn = currentPlayer == Player.First ? TurnStatus.GameOverFirstWin : TurnStatus.GameOverSecondWin;
+                return new Command(cellOwner, DrawingType.EndGame, row, column, args.Item1, args.Item2);
+            }
+
             return new Command(cellOwner, DrawingType.DestroyShip, row, column, args.Item1, args.Item2);
         }
 
@@ -88,6 +142,13 @@ public class Game
 
     public Command Click(Player cellOwner, int row, int column)
     {
+        if (_turn == TurnStatus.GameOverFirstWin || _turn == TurnStatus.GameOverSecondWin)
+        {
+            var currentPlayer = _turn == TurnStatus.GameOverFirstWin ? Player.First : Player.Second;
+            MessageBox.Show($"Игра окончена, победил {currentPlayer} Player");
+            return new Command(cellOwner, DrawingType.Empty);
+        }
+        
         if (row == -1 && column == -1)
         {
             if (_turn is TurnStatus.FirstPlayerPreparation or TurnStatus.SecondPlayerPreparation)
